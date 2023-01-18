@@ -13,9 +13,9 @@ load_dotenv()
 
 #gets different RNG parameters from RNG API based off of difficulty level
 URL = os.environ.get("RNG_URL")
-PARAMS_ZERO = json.loads(os.environ.get("RNG_PARAMS_DIFF_ZERO"))
-PARAMS_ONE = json.loads(os.environ.get("RNG_PARAMS_DIFF_ONE"))
-PARAMS_TWO = json.loads(os.environ.get("RNG_PARAMS_DIFF_TWO"))
+PARAMS_FOR_DIFFICULTY_LEVEL_ZERO = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ZERO"))
+PARAMS_FOR_DIFFICULTY_LEVEL_ONE = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ONE"))
+PARAMS_FOR_DIFFICULTY_LEVEL_TWO = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_TWO"))
 KEYWORDS = ["/history", "/hint"]
 TITLE="""  
   __  __           _____ _______ ______ _____  __  __ _____ _   _ _____  _ 
@@ -61,19 +61,20 @@ class Game:
             print("Enter a difficulty (hard, harder, or hardest):")
             verbose_difficulty = input()
         if verbose_difficulty.lower() == "hard":
-            return 0
+            difficulty = 0
         elif verbose_difficulty.lower() == "harder":
-            return 1
+            difficulty = 1
         else:
-            return 2
+            difficulty = 2
+        return difficulty
 
     def fetch_answer(self, difficulty) -> str:
         if difficulty == 1:
-            raw_ans = requests.get(url=URL, params=PARAMS_ONE)
+            raw_ans = requests.get(url=URL, params=PARAMS_FOR_DIFFICULTY_LEVEL_ONE)
         elif difficulty == 2:
-            raw_ans = requests.get(url=URL, params=PARAMS_TWO)
+            raw_ans = requests.get(url=URL, params=PARAMS_FOR_DIFFICULTY_LEVEL_TWO)
         else:
-            raw_ans = requests.get(url=URL, params=PARAMS_ZERO)
+            raw_ans = requests.get(url=URL, params=PARAMS_FOR_DIFFICULTY_LEVEL_ZERO)
 
         ans = raw_ans.text.replace("\n","")
 
@@ -81,10 +82,13 @@ class Game:
     
     def read_score_from_file(self) -> int:
         f = open("score.txt","r")
+        score = 0
         try:
-            return int(f.read()[-1])
+            score = int(f.read()[-1])
         except BaseException as e:
-            return 0
+            pass
+        finally:
+            return score
 
     def increment_score_in_file(self) -> None:
         try:
@@ -129,6 +133,7 @@ class Game:
         return ""
 
     def generate_hints(self) -> list:
+        # num_total_hints_in_hints_bank = number of total possible hints that hints are being chosen from
         num_hints_in_hints_bank = 5
         hints = []
         possible_hints = set(range(num_hints_in_hints_bank))
@@ -142,8 +147,6 @@ class Game:
 
     def validate_guess(self, input_guess: str) -> str:
         
-        retry_count = 3
-        while retry_count > 0:
             try:
                 #history and hint command inside guess validation failure loop
                 if input_guess in KEYWORDS:
@@ -151,34 +154,22 @@ class Game:
                 #checks for length = digit_count (varies based on difficulty) and whether digits are between 0-7
                 #if input is not in proper format,initializes retry_count. If 3 retries occur, subtracts from guesses_remaining
                 if len(input_guess) != self.digit_count or "8" in input_guess or "9" in input_guess:
-                    retry_count -= 1
-                    if retry_count == 0:
-                        retry_count = 3
-                        self.guesses_remaining -= 1
-                        print("\nMASTERMIND: Muahahaha! Your guess belongs to me!")
-                        self.guess_history.append("Guess subtracted for incorrect guess format.")
-                    else:
-                        print(f"\nMASTERMIND: I tire of your ignorance! Your guess must be {self.digit_count} digits, each between 0 and 7, inclusive! I will allow you {retry_count} more attempts before I strike down one of your guesses!\n")
-                    if self.guesses_remaining == 0:
-                        return "you lose"
+                    print(f"\nMASTERMIND: I tire of your ignorance! Your guess must be {self.digit_count} digits, each between 0 and 7, inclusive!\n")
                     print("Hints Remaining (type /hint to see a hint):",len(self.hints))
                     print("Guesses Remaining:",self.guesses_remaining)
                     sys.stdout.write("Guess:\t")
                     input_guess = input()
                     if input_guess in KEYWORDS:
                         return input_guess
-                    continue
                 int(input_guess)
             except ValueError as v:
-                retry_count -= 1
-                print(f"\nMASTERMIND: You fool - what do you mean, {input_guess}?! I demand that you only enter digits between 0-7, inclusive. I will allow you {retry_count} more attempts before I strike down one of your guesses!\n")
+                print(f"\nMASTERMIND: You fool - what do you mean, {input_guess}?! I demand that you only enter digits between 0-7, inclusive.\n")
                 print("Hints Remaining (type /hint to see a hint):",len(self.hints))
                 print("Guesses Remaining:",self.guesses_remaining)
                 sys.stdout.write("Guess:\t")
                 input_guess = input()
-                continue
             else:
-                return str(input_guess)
+                return f"{input_guess}"
 
     def guess_feedback(self, guess: str) -> str | dict[str, int]:
         guess = self.validate_guess(guess)
