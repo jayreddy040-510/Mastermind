@@ -42,7 +42,7 @@ class Game:
         self.digit_count = 4 + self.difficulty
         self.guesses_remaining = 10
         self.guess_history = []
-        print("\n","\rSYS_MESSAGE: ~Cheater, cheater, pumpkin eater:",self.ans,"\n") if cheater == True else True
+        print("\rSYS_MESSAGE: ~Cheater, cheater, pumpkin eater:",self.ans,"\n") if cheater == True else True
         print(f"MASTERMIND: I'm thinking of a {self.digit_count} digit number using digits between 0 and 7. Try and guess it, if you dare!\n")
         self.run_game()
 
@@ -233,35 +233,15 @@ class Game:
         else:
             pass
 
-    def run_game(self):
-        while self.guesses_remaining > 0:
-            print(LINE,"\n")
-            try:
-                print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx - self.difficulty)
-                print("Guesses Remaining (type /guess_history to see Guess History):",self.guesses_remaining)
-                sys.stdout.write("Guess: ")
-                guess = input()
-                if guess in KEYWORDS:
-                    self.handle_keyword(guess)
-                elif guess == self.ans:
-                    print("\nVICTORY\n")
-                    self.increment_score_in_file()
-                    if self.ask_user_replay() == True:
-                        self.handle_replay()
-                        continue
-                    else:
-                        print("\nMASTERMIND: I'll get you next time!!!")
-                        return
-                else:
-                    validated_guess = self.validate_guess(guess)
-                    guess_feedback = self.generate_guess_feedback(validated_guess)
-                    print(guess_feedback)
-                    self.guess_history.append(guess_feedback)
-                    self.guesses_remaining -= 1
-                    pass
-            except Exception as e:
-                print("Try again...")
-        print("\nYOU LOSE\n")
+    def handle_guess_equals_answer(self) -> bool:
+        print("\nVICTORY\n")
+        self.increment_score_in_file()
+        if self.ask_user_replay() == True:
+            self.handle_replay()
+            return True
+        else:
+            print("\nMASTERMIND: I'll get you next time!!!")
+            return False
 
     def ask_user_replay(self) -> bool:
         while True:
@@ -276,6 +256,33 @@ class Game:
 
     def handle_replay(self) -> None:
         pass
+
+    def run_game(self):
+        while self.guesses_remaining > 0:
+            print(LINE,"\n")
+            try:
+                print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx - self.difficulty)
+                print("Guesses Remaining (type /guess_history to see Guess History):",self.guesses_remaining)
+                sys.stdout.write("Guess: ")
+                guess = input()
+                if guess in KEYWORDS:
+                    self.handle_keyword(guess)
+                elif guess == self.ans:
+                    if self.handle_guess_equals_answer() == True:
+                        continue
+                    else:
+                        return
+                else:
+                    validated_guess = self.validate_guess(guess)
+                    guess_feedback = self.generate_guess_feedback(validated_guess)
+                    print(guess_feedback)
+                    self.guess_history.append(guess_feedback)
+                    self.guesses_remaining -= 1
+                    pass
+            except Exception as e:
+                print("Try again...")
+        print("\nYOU LOSE\n")
+
 
 
 
