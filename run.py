@@ -1,4 +1,2 @@
 from game_class import Game
-
-
-Game(cheater=True)
+g = Game(cheater=True)

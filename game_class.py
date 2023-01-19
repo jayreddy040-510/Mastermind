@@ -12,21 +12,22 @@ from collections import defaultdict
 load_dotenv()
 
 #gets different RNG parameters from RNG API based off of difficulty level
-URL = os.environ.get("RNG_URL")
-PARAMS_FOR_DIFFICULTY_LEVEL_ZERO = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ZERO"))
-PARAMS_FOR_DIFFICULTY_LEVEL_ONE = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ONE"))
-PARAMS_FOR_DIFFICULTY_LEVEL_TWO = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_TWO"))
-KEYWORDS = ["/guess_history", "/hint", "/hint_history"]
-TITLE="""  
-  __  __           _____ _______ ______ _____  __  __ _____ _   _ _____  _ 
- |  \/  |   /\    / ____|__   __|  ____|  __ \|  \/  |_   _| \ | |  __ \| |
- | \  / |  /  \  | (___    | |  | |__  | |__) | \  / | | | |  \| | |  | | |
- | |\/| | / /\ \  \___ \   | |  |  __| |  _  /| |\/| | | | | . ` | |  | | |
- | |  | |/ ____ \ ____) |  | |  | |____| | \ \| |  | |_| |_| |\  | |__| |_|
- |_|  |_/_/    \_\_____/   |_|  |______|_|  \_\_|  |_|_____|_| \_|_____/(_)
-                                                                           
-                                                                           
+URL=os.environ.get("RNG_URL")
+PARAMS_FOR_DIFFICULTY_LEVEL_ZERO=json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ZERO"))
+PARAMS_FOR_DIFFICULTY_LEVEL_ONE=json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ONE"))
+PARAMS_FOR_DIFFICULTY_LEVEL_TWO=json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_TWO"))
+KEYWORDS=["/guess_history", "/hint", "/hint_history"]
+TITLE="""\r
+ __  __           _____ _______ ______ _____  __  __ _____ _   _ _____  _ 
+|  \/  |   /\    / ____|__   __|  ____|  __ \|  \/  |_   _| \ | |  __ \| |
+| \  / |  /  \  | (___    | |  | |__  | |__) | \  / | | | |  \| | |  | | |
+| |\/| | / /\ \  \___ \   | |  |  __| |  _  /| |\/| | | | | . ` | |  | | |
+| |  | |/ ____ \ ____) |  | |  | |____| | \ \| |  | |_| |_| |\  | |__| |_|
+|_|  |_/_/    \_\_____/   |_|  |______|_|  \_\_|  |_|_____|_| \_|_____/(_)
+                                                                          
+                                                                          
 """
+LINE="\r---------------------------------------------------------------------------------------------------------------------------------"
 
 
 #main game class
@@ -50,12 +51,14 @@ class Game:
         print("Welcome! You have entered the lair of the...")
         time.sleep(2.0)
         print(TITLE)
-        time.sleep(2.0)
+        time.sleep(3.0)
         os.system("clear")
     
     def input_user_difficulty(self) -> int:
         print("MASTERMIND: Enter a difficulty (hard, harder, or hardest):\n")
+        sys.stdout.write("Difficulty: ")
         verbose_difficulty = input()
+        print("\n",LINE,"\n")
         while verbose_difficulty.lower() not in ["hard", "harder", "hardest"]:
             print("\nMASTERMIND: Ugh! I said choose between hard, harder, or hardest!!!\n")
             print("Enter a difficulty (hard, harder, or hardest):")
@@ -99,10 +102,10 @@ class Game:
             x = 0
         finally:
             f = open("score.txt", "w")
-            f.write(f"score: {x+1}")
+            f.write(f"Score: {x+1}")
             f.close()
             f = open("score.txt", "r")
-            print(f.read())
+            print(f.read(),"\n")
             f.close()
 
     def generate_hint(self, hint_num: int) -> str:
@@ -147,8 +150,7 @@ class Game:
 
     def validate_guess(self, input_guess: str) -> str:
             
-        valid_guess = False
-        while valid_guess == False:
+        while True:
             #guess_history, hint, and hint_history commands inside guess validation failure loop
             if input_guess in KEYWORDS:
                 return input_guess
@@ -157,18 +159,20 @@ class Game:
                 #if input is not in proper format, asks for input again.
                 if len(input_guess) != self.digit_count or "8" in input_guess or "9" in input_guess:
                     print(f"\nMASTERMIND: I tire of your ignorance! Your guess must be {self.digit_count} digits, each between 0 and 7, inclusive!\n")
-                    print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx - self.difficulty)
+                    print(LINE,"\n")
+                    print("Hints Remaining (type /hint to see a hint or /hint_history):", 3 - self.hints_history_idx - self.difficulty)
                     print("Guesses Remaining:",self.guesses_remaining)
-                    sys.stdout.write("Guess:\t")
+                    sys.stdout.write("Guess: ")
                     input_guess = input()
                     if input_guess in KEYWORDS:
                         return input_guess
                 int(input_guess)
             except ValueError as v:
-                print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that you only enter digits between 0-7, inclusive.\n")
+                print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that enter {self.digit_count} digits between 0-7, inclusive.\n")
+                print(LINE,"\n")
                 print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx)
                 print("Guesses Remaining:",self.guesses_remaining)
-                sys.stdout.write("Guess:\t")
+                sys.stdout.write("Guess: ")
                 input_guess = input()
             else:
                 return f"{input_guess}"
@@ -231,16 +235,23 @@ class Game:
 
     def run_game(self):
         while self.guesses_remaining > 0:
+            print(LINE,"\n")
             try:
                 print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx - self.difficulty)
                 print("Guesses Remaining (type /guess_history to see Guess History):",self.guesses_remaining)
-                sys.stdout.write("Guess:\t")
+                sys.stdout.write("Guess: ")
                 guess = input()
                 if guess in KEYWORDS:
                     self.handle_keyword(guess)
                 elif guess == self.ans:
                     print("\nVICTORY\n")
                     self.increment_score_in_file()
+                    if self.ask_user_replay() == True:
+                        self.handle_replay()
+                        continue
+                    else:
+                        print("\nMASTERMIND: I'll get you next time!!!")
+                        return
                 else:
                     validated_guess = self.validate_guess(guess)
                     guess_feedback = self.generate_guess_feedback(validated_guess)
@@ -252,9 +263,25 @@ class Game:
                 print("Try again...")
         print("\nYOU LOSE\n")
 
+    def ask_user_replay(self) -> bool:
+        while True:
+            sys.stdout.write("\nPlay again? (y/n): ")
+            play_again_response = input()
+            if play_again_response.lower() not in ["y", "n", "yes", "no"]:
+                print("\nPlease answer y or n!")
+            elif play_again_response in ["n", "no"]:
+                return False
+            else:
+                return True
+
+    def handle_replay(self) -> None:
+        pass
 
 
-g = Game(cheater=True)
+
+
+
+# g = Game(cheater=True)
 
 
 
