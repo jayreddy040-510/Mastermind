@@ -229,26 +229,6 @@ class Game:
         else:
             pass
 
-    # def turn(self):
-    #     try:
-    #         print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx)
-    #         print("Guesses Remaining (type /guess_history to see Guess History):",self.guesses_remaining)
-    #         sys.stdout.write("Guess:\t")
-    #         guess = input()
-    #         if guess in KEYWORDS:
-    #             return guess
-    #         if guess == self.ans:
-    #             return "victory"
-    #         guess_feedback = self.guess_feedback(guess)
-
-    #         if guess_feedback in KEYWORDS:
-    #             return guess_feedback
-    #         else:
-    #             print(guess_feedback)
-    #             self.guess_history.append(guess_feedback)
-    #     except Exception as e:
-    #         print("Try again...")
-
     def run_game(self):
         while self.guesses_remaining > 0:
             try:
