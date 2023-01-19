@@ -16,7 +16,7 @@ URL = os.environ.get("RNG_URL")
 PARAMS_FOR_DIFFICULTY_LEVEL_ZERO = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ZERO"))
 PARAMS_FOR_DIFFICULTY_LEVEL_ONE = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ONE"))
 PARAMS_FOR_DIFFICULTY_LEVEL_TWO = json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_TWO"))
-KEYWORDS = ["/history", "/hint"]
+KEYWORDS = ["/guess_history", "/hint", "/hint_history"]
 TITLE="""  
   __  __           _____ _______ ______ _____  __  __ _____ _   _ _____  _ 
  |  \/  |   /\    / ____|__   __|  ____|  __ \|  \/  |_   _| \ | |  __ \| |
@@ -32,25 +32,25 @@ TITLE="""
 #main game class
 class Game:
     def __init__(self, cheater: bool=False):
-        self.welcome_animation()
+        self.generate_welcome_animation()
         self.score = self.read_score_from_file()
         self.difficulty = self.input_user_difficulty()
         self.ans = self.fetch_answer(self.difficulty)
         self.hints = self.generate_hints()
-        self.hints_history = []
+        self.hints_history_idx = 0
         self.digit_count = 4 + self.difficulty
         self.guesses_remaining = 10
         self.guess_history = []
         print("\n","\rSYS_MESSAGE: ~Cheater, cheater, pumpkin eater:",self.ans,"\n") if cheater == True else True
-        print(f"MASTERMIND: I'm thinking of a {self.digit_count} digit number number using digits between 0 and 7. Try and guess it, if you dare!\n")
-        print(self.run_game())
+        print(f"MASTERMIND: I'm thinking of a {self.digit_count} digit number using digits between 0 and 7. Try and guess it, if you dare!\n")
+        self.run_game()
 
-    def welcome_animation(self):
+    def generate_welcome_animation(self):
         os.system("clear")
-        print("Welcome, Mag! You have entered the lair of the...")
+        print("Welcome! You have entered the lair of the...")
         time.sleep(2.0)
         print(TITLE)
-        time.sleep(4.0)
+        time.sleep(2.0)
         os.system("clear")
     
     def input_user_difficulty(self) -> int:
@@ -108,28 +108,28 @@ class Game:
     def generate_hint(self, hint_num: int) -> str:
         match hint_num:
             case 0:
-                return f"MASTERMIND: A hint?! Really?! You need a hint?! Fine. The last digit of the number in my head is {self.ans[-1]}"
+                return f"\nMASTERMIND: A hint?! Really?! You need a hint?! Fine. The last digit of the number in my head is {self.ans[-1]}"
             case 1:
                 sum = 0
                 for idx in range(len(self.ans)):
                     sum += int(self.ans[idx])
-                return f"MASTERMIND: FINE. The sum of the digits for the number in my head is {sum}"
+                return f"\nMASTERMIND: FINE. The sum of the digits for the number in my head is {sum}"
             case 2:
                 less_than_equal_3_count = 0
                 for idx in range(len(self.ans)):
                     if int(self.ans[idx]) <= 3:
                         less_than_equal_3_count += 1
-                return f"MASTERMIND: There are {less_than_equal_3_count} digits in the number in my head that are less than or equal to 3"
+                return f"\nMASTERMIND: There are {less_than_equal_3_count} digits in the number in my head that are less than or equal to 3"
             case 3:
                 product = 1
                 for idx in range(len(self.ans)):
                     product *= int(self.ans[idx])
-                return f"MASTERMIND: FINE. The product of the digits for the number in my head is {product}"
+                return f"\nMASTERMIND: FINE. The product of the digits for the number in my head is {product}"
             case 4:
                  while True:
                     hint = str(random.randint(0,7))
                     if hint not in self.ans:
-                        return f"MASTERMIND: {hint} is not a digit in the number I am thinking of"
+                        return f"\nMASTERMIND: {hint} is not a digit in the number I am thinking of"
         return ""
 
     def generate_hints(self) -> list:
@@ -146,16 +146,18 @@ class Game:
         
 
     def validate_guess(self, input_guess: str) -> str:
-        
+            
+        valid_guess = False
+        while valid_guess == False:
+            #guess_history, hint, and hint_history commands inside guess validation failure loop
+            if input_guess in KEYWORDS:
+                return input_guess
             try:
-                #history and hint command inside guess validation failure loop
-                if input_guess in KEYWORDS:
-                    return input_guess
                 #checks for length = digit_count (varies based on difficulty) and whether digits are between 0-7
-                #if input is not in proper format,initializes retry_count. If 3 retries occur, subtracts from guesses_remaining
+                #if input is not in proper format, asks for input again.
                 if len(input_guess) != self.digit_count or "8" in input_guess or "9" in input_guess:
                     print(f"\nMASTERMIND: I tire of your ignorance! Your guess must be {self.digit_count} digits, each between 0 and 7, inclusive!\n")
-                    print("Hints Remaining (type /hint to see a hint):",len(self.hints))
+                    print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx - self.difficulty)
                     print("Guesses Remaining:",self.guesses_remaining)
                     sys.stdout.write("Guess:\t")
                     input_guess = input()
@@ -163,20 +165,18 @@ class Game:
                         return input_guess
                 int(input_guess)
             except ValueError as v:
-                print(f"\nMASTERMIND: You fool - what do you mean, {input_guess}?! I demand that you only enter digits between 0-7, inclusive.\n")
-                print("Hints Remaining (type /hint to see a hint):",len(self.hints))
+                print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that you only enter digits between 0-7, inclusive.\n")
+                print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx)
                 print("Guesses Remaining:",self.guesses_remaining)
                 sys.stdout.write("Guess:\t")
                 input_guess = input()
             else:
                 return f"{input_guess}"
 
-    def guess_feedback(self, guess: str) -> str | dict[str, int]:
-        guess = self.validate_guess(guess)
+    def generate_guess_feedback(self, guess: str) -> str | dict[str, int]:
         if guess in KEYWORDS:
             return guess
-        if guess == "you lose":
-            return "you lose"
+        guess = self.validate_guess(guess)
         ans = self.ans
         ret = {"correct number": 0, "correct location": 0}
         ans_count = defaultdict(int)
@@ -195,72 +195,82 @@ class Game:
         ret = "all incorrect" if ret["correct location"] + ret["correct number"] == 0 else ret
         return f"Feedback for {guess}: {ret}\n"
 
-    def generate_guess_history(self, guess_history: list[str]) -> None:
-        """
-        args: [guess1, guess2, guess3]
-        """
+    def handle_guess_history_command(self) -> None:
         print("\n \rGuess History:")
-        for idx in range(len(guess_history)):
-            print(f"{idx+1}: ",guess_history[idx])
+        for idx in range(len(self.guess_history)):
+            print(f"{idx+1}: ",self.guess_history[idx])
         print("\n \n")
 
-    def manage_hint_commmand(self):
-        if len(self.hints) == 0:
-            print("MASTERMIND: YOU HAVE NO MORE HINTS!\n")
-            print("Hints Remaining: None")
-            print("\nHint History:\n")
-            for hint in self.hints_history:
-                print(hint)
+    def handle_hint_commmand(self) -> None:
+        if self.hints_history_idx > 2 - self.difficulty:
+            print("\nMASTERMIND: YOU HAVE NO MORE HINTS!\n")
+        else:
+            latest_hint = self.hints[self.hints_history_idx]
+            print(latest_hint, "\n")
+            self.hints_history_idx += 1
+
+
+    def handle_hint_history_command(self) -> None:
+        if self.hints_history_idx-1 >= 0:
+            print("\nHint History:")
+            for idx in range(self.hints_history_idx):
+                print(self.hints[idx])
             print("\n")
         else:
-            latest_hint = self.hints.pop()
-            print(latest_hint, "\n")
-            print("Hints Remaining:", len(self.hints))
-            print("\nHint History:\n")
-            if len(self.hints_history) > 0:
-                for hint in self.hints_history:
-                    print(hint)
-                print("\n")
-            self.hints_history.append(latest_hint)
+            print("\nYou haven't asked for any hints yet; enter the command /hint to ask for a hint.\n")
 
+    def handle_keyword(self, keyword: str):
+        if keyword == "/hint":
+            self.handle_hint_commmand()
+        elif keyword == "/guess_history":
+            self.handle_guess_history_command()
+        elif keyword == "/hint_history":
+            self.handle_hint_history_command()
+        else:
+            pass
 
-    def turn(self):
-        try:
-            print("Hints Remaining (type /hint to see a hint):",len(self.hints))
-            print("Guesses Remaining (type /history to see Guess History):",self.guesses_remaining)
-            sys.stdout.write("Guess:\t")
-            guess = input()
-            if guess in KEYWORDS:
-                return guess
-            if guess == self.ans:
-                return "victory"
-            guess_feedback = self.guess_feedback(guess)
-            if guess_feedback == "you lose":
-                return "you lose"
-            elif guess_feedback in KEYWORDS:
-                return guess_feedback
-            else:
-                print(guess_feedback)
-                self.guess_history.append(guess_feedback)
-        except Exception as e:
-            print("Try again...")
+    # def turn(self):
+    #     try:
+    #         print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx)
+    #         print("Guesses Remaining (type /guess_history to see Guess History):",self.guesses_remaining)
+    #         sys.stdout.write("Guess:\t")
+    #         guess = input()
+    #         if guess in KEYWORDS:
+    #             return guess
+    #         if guess == self.ans:
+    #             return "victory"
+    #         guess_feedback = self.guess_feedback(guess)
+
+    #         if guess_feedback in KEYWORDS:
+    #             return guess_feedback
+    #         else:
+    #             print(guess_feedback)
+    #             self.guess_history.append(guess_feedback)
+    #     except Exception as e:
+    #         print("Try again...")
 
     def run_game(self):
         while self.guesses_remaining > 0:
-            turn = self.turn()
-            if turn == "victory":
-                return "\nVICTORY\n"
-            elif turn == "you lose":
-                return "\nYOU LOSE\n"
-            elif turn == "/history":
-                self.generate_guess_history(self.guess_history)
-            elif turn == "/hint":
-                print("\n")
-                self.manage_hint_commmand()
-            else:
-                self.guesses_remaining -= 1
-                pass
-        return "you lose"
+            try:
+                print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_history_idx - self.difficulty)
+                print("Guesses Remaining (type /guess_history to see Guess History):",self.guesses_remaining)
+                sys.stdout.write("Guess:\t")
+                guess = input()
+                if guess in KEYWORDS:
+                    self.handle_keyword(guess)
+                elif guess == self.ans:
+                    print("\nVICTORY\n")
+                    self.increment_score_in_file()
+                else:
+                    validated_guess = self.validate_guess(guess)
+                    guess_feedback = self.generate_guess_feedback(validated_guess)
+                    print(guess_feedback)
+                    self.guess_history.append(guess_feedback)
+                    self.guesses_remaining -= 1
+                    pass
+            except Exception as e:
+                print("Try again...")
+        print("\nYOU LOSE\n")
 
 
 
