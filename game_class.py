@@ -312,7 +312,6 @@ class Game:
         if self.ask_user_replay() == True:
             return True
         else:
-            print("\nMASTERMIND: I'll get you next time!!!")
             return False
 
     def ask_user_replay(self) -> bool:
@@ -355,6 +354,7 @@ class Game:
                         self.handle_replay()
                         continue
                     else:
+                        print("\nMASTERMIND: I'll get you next time!!!")
                         return
                 else:
                     validated_guess = self.validate_guess(guess)
