@@ -24,27 +24,16 @@ NUM_UNIQUE_HINT_TEMPLATES=5
 KEYWORDS=["/guess_history", "/hint", "/hint_history", "/score"]
 
 #various tools used for UX/UI
-TITLE="""\r
- __  __           _____ _______ ______ _____  __  __ _____ _   _ _____  _ 
-|  \/  |   /\    / ____|__   __|  ____|  __ \|  \/  |_   _| \ | |  __ \| |
-| \  / |  /  \  | (___    | |  | |__  | |__) | \  / | | | |  \| | |  | | |
-| |\/| | / /\ \  \___ \   | |  |  __| |  _  /| |\/| | | | | . ` | |  | | |
-| |  | |/ ____ \ ____) |  | |  | |____| | \ \| |  | |_| |_| |\  | |__| |_|
-|_|  |_/_/    \_\_____/   |_|  |______|_|  \_\_|  |_|_____|_| \_|_____/(_)
-                                                                          
-                                                                          
-"""
-LINE="\r---------------------------------------------------------------------------------------------------------------------------------"
+from game_ascii import TITLE, WIN_MSG, LOSE_MSG, LINE
 
 
 #main game class
 class Game:
     def __init__(self, show_ans: bool=False):
-        self.play_welcome_animation()
+        self.print_welcome_animation()
         self.score = self.read_score_from_file()
         self.difficulty = self.input_user_difficulty()
-        # self.ans = self.fetch_answer()
-        self.ans = "1234"
+        self.ans = self.fetch_answer()
         self.hints = self.generate_hints()
         self.hints_idx = 0
         self.digit_count = 4 + self.difficulty
@@ -55,15 +44,15 @@ class Game:
         print(f"MASTERMIND: I'm thinking of a {self.digit_count} digit number using digits between 0 and 7. Try and guess it, if you dare!\n")
         self.run_game()
 
-    def play_welcome_animation(self, replay: bool=False) -> None:
+    def print_welcome_animation(self, replay: bool=False) -> None:
         """
 
         # this function clears the terminal and prints the welcome animation to start the game. if replay boolean is true, function slightly alters welcome message.
 
-        Args:
+        Example Arg(s):
             None
             Optional: replay (bool)
-        Returns:
+        Example Return:
             None
 
         """
@@ -83,9 +72,9 @@ class Game:
 
         this function prompts the user to enter their desired difficulty as a string, validates it (re-prompting for input if failed validation), and returns it as an integer to be saves in an instance attribute
 
-        Args:
+        Example Arg(s):
             None
-        Returns:
+        Example Return:
             0 (int)
 
         """
@@ -110,9 +99,9 @@ class Game:
         
         this function uses the random number generator API and the corresponding API parameters (different difficulties of game require different parameters) to generate an answer string that is returned and saved as the self.ans instance variable
 
-        Args:
+        Example Arg(s):
             None
-        Returns:
+        Example Return:
             "1234" (str)
 
         """
@@ -132,9 +121,9 @@ class Game:
         
         this function reads ../mastermind_lite/score.txt and checks the score. if file read fails for any reason, score is assigned as 0
 
-        Args:
+        Example Arg(s):
             None
-        Returns:
+        Example Return:
             1 (int)
         
         """
@@ -152,9 +141,9 @@ class Game:
         
         this function is called upon win condition being met (user guesses the mastermind's number). it reads the current score from the score instance variable, increments the score by 1, and rewrites score.txt to persist that change in score. finally, it prints that score to the terminal
 
-        Args:
+        Example Arg(s):
             None
-        Returns:
+        Example Return:
             None
         
         """
@@ -173,10 +162,10 @@ class Game:
         
         this function is used together with generate_hints (ln 195) to create the acceptable amount of hints (correlated to difficulty) and store them in an instance variable list called hints (ln 41). there are a total of 5 hint templates and the easiest game mode (facetiously called "hard") allows for 3 hints
 
-        Args:
-            Hint Number (int)
-        Returns:
-            Hint (str)
+        Example Arg(s):
+            1 (int)
+        Example Return:
+            MASTERMIND: FINE. The sum of the digits for the number in my head is 24" (string)
         
         """
         match hint_num:
@@ -208,11 +197,11 @@ class Game:
     def generate_hints(self) -> list[str]:
         """
         
-        this function is used together with generate_hint (ln 171) and python's random module to randomly create the appropriate number of hints (correlated to difficulty chosen) per game. NUM_UNIQUE_HINT_TEMPLATES is a variable that represents the total number of unique hint templates that hints can be made from (ln 21)
+        this function is used together with generate_hint (ln 171) and python's random module to randomly generate a number which is then plugged into generate_hint which returns a hint and appends it to the hints list instance attribute (ln 224). NUM_UNIQUE_HINT_TEMPLATES is a variable that represents the total number of unique hint templates that hints can be made from (ln 21)
 
-        Args:
+        Example Arg(s):
             None
-        Returns:
+        Example Return:
             [hint_a, hint_b, hint_c] (list[str])
         """
         num_unique_hint_templates = NUM_UNIQUE_HINT_TEMPLATES
@@ -229,16 +218,18 @@ class Game:
     def validate_guess(self, input_guess: str) -> str:
         """
 
-        this function passes in the user's input_guess and validates it across 3 parameters:
+        this function passes in the user's input_guess and validates it across 3 parameters, returning a validated guess:
 
         1. len of input_guess should be the same as the digit count instance attribute (ln 183)
         2. digits in input_guess should only be from 0-7, inclusive (ln 183)
         3. input_guess only contains chars that can be cast as an integer (ln 195)
 
-        Args:
-            Input Guess (str)
-        Returns:
-            Validated Guess (str)
+        if input_guess fails any of the above 3 validations, user is prompted again
+
+        Example Arg(s):
+            "1234" (str)
+        Example Return:
+            "1234" (str)
             
         """    
         while True:
@@ -250,25 +241,27 @@ class Game:
             try:
                 if len(input_guess) != self.digit_count or "8" in input_guess or "9" in input_guess:
                     print(f"\nMASTERMIND: I tire of your ignorance! Your guess must be {self.digit_count} digits, each between 0 and 7, inclusive!\n")
-                    print(LINE,"\n")
-                    print("Hints Remaining (type /hint to see a hint or /hint_history):", 3 - self.hints_idx - self.difficulty)
-                    print("Guesses Remaining:",self.guesses_remaining)
-                    sys.stdout.write("Guess: ")
+                    self.print_turn_intro()
                     input_guess = input()
                     if input_guess in KEYWORDS:
                         return input_guess
                 validated_guess = int(input_guess)
             except ValueError as v:
                 print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that you enter {self.digit_count} digits between 0-7, inclusive.\n")
-                print(LINE,"\n")
-                print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_idx)
-                print("Guesses Remaining:",self.guesses_remaining)
-                sys.stdout.write("Guess: ")
+                self.print_turn_intro()
                 input_guess = input()
             else:
                 return f"{validated_guess}"
 
     def generate_guess_feedback(self, guess: str) -> str | dict[str, int]:
+        """
+        
+        this function details the core logic behind allocating "correct number," "correct location," or "all incorrect" feedback info to give to user after each validated guess
+        
+        Args:
+            
+
+        """
         if guess in KEYWORDS:
             return guess
         guess = self.validate_guess(guess)
@@ -332,8 +325,8 @@ class Game:
             case _:
                 pass
 
-    def handle_victory_and_ask_replay(self) -> bool:
-        print("\nVICTORY\n")
+    def handle_win_and_ask_replay(self) -> bool:
+        print(WIN_MSG)
         self.increment_score_in_file()
         if self.ask_user_replay() == True:
             return True
@@ -352,7 +345,7 @@ class Game:
                 return True
 
     def handle_replay(self) -> None:
-        self.play_welcome_animation(replay=True)
+        self.print_welcome_animation(replay=True)
         self.score = self.read_score_from_file()
         self.difficulty = self.input_user_difficulty()
         self.ans = self.fetch_answer()
@@ -365,19 +358,27 @@ class Game:
         self.guess_history = []
         return
 
-    def run_game(self):
+    def print_turn_intro(self) -> None:
+        print(LINE,"\n")
+        print("Hints Remaining (enter /hint to see a hint or /hint_history to see previous hints):", 3 - self.hints_idx - self.difficulty)
+        print("Guesses Remaining (enter /guess_history to see Guess History):",self.guesses_remaining)
+        sys.stdout.write("Guess: ")
+
+    def handle_lose_and_ask_replay(self) -> None:
+        print(LOSE_MSG)
+        sys.stdout.write(f"\n\rScore: {self.score}\n")
+        self.ask_user_replay()
+
+    def run_game(self) -> None:
         while self.guesses_remaining > 0:
-            print(LINE,"\n")
+            self.print_turn_intro()
             try:
-                print("Hints Remaining (enter /hint to see a hint or /hint_history to see Hint History):", 3 - self.hints_idx - self.difficulty)
-                print("Guesses Remaining (enter /guess_history to see Guess History):",self.guesses_remaining)
-                sys.stdout.write("Guess: ")
                 guess = input()
                 validated_guess = self.validate_guess(guess)
                 if validated_guess in KEYWORDS:
                     self.handle_keyword(validated_guess)
                 elif validated_guess == self.ans:
-                    if self.handle_victory_and_ask_replay() == True:
+                    if self.handle_win_and_ask_replay() == True:
                         self.handle_replay()
                         continue
                     else:
@@ -388,10 +389,16 @@ class Game:
                     print(guess_feedback)
                     self.guess_history.append(guess_feedback)
                     self.guesses_remaining -= 1
-                    pass
+                    if self.guesses_remaining == 0:
+                        if self.handle_lose_and_ask_replay() == True:
+                            self.handle_replay()
+                            continue
+                        else:
+                            print("\nMASTERMIND: Pfft! What a sore loser! Until next time.")
+                            return
             except Exception as e:
                 print("MASTERMIND: Try again...\n")
-        print("\nYOU LOSE\n")
+
 
 
 
