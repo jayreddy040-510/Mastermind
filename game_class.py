@@ -16,7 +16,14 @@ URL=os.environ.get("RNG_URL")
 PARAMS_FOR_DIFFICULTY_LEVEL_ZERO=json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ZERO"))
 PARAMS_FOR_DIFFICULTY_LEVEL_ONE=json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_ONE"))
 PARAMS_FOR_DIFFICULTY_LEVEL_TWO=json.loads(os.environ.get("RNG_PARAMS_FOR_DIFFICULTY_LEVEL_TWO"))
+
+#number of unique hint templates that can be used to create hints at the start of each game
+NUM_UNIQUE_HINT_TEMPLATES=5
+
+#keywords that user can input
 KEYWORDS=["/guess_history", "/hint", "/hint_history", "/score"]
+
+#various tools used for UX/UI
 TITLE="""\r
  __  __           _____ _______ ______ _____  __  __ _____ _   _ _____  _ 
 |  \/  |   /\    / ____|__   __|  ____|  __ \|  \/  |_   _| \ | |  __ \| |
@@ -55,6 +62,7 @@ class Game:
 
         Args:
             None
+            Optional: replay (bool)
         Returns:
             None
 
@@ -142,7 +150,7 @@ class Game:
     def increment_score_in_file(self) -> None:
         """
         
-        this function reads the current score from the score instance variable, increments the score by 1 and rewrites score.txt to persist that change in score. finally it prints that score to the terminal
+        this function is called upon win condition being met (user guesses the mastermind's number). it reads the current score from the score instance variable, increments the score by 1, and rewrites score.txt to persist that change in score. finally, it prints that score to the terminal
 
         Args:
             None
@@ -161,6 +169,16 @@ class Game:
             sys.stdout.write(f"\n\rScore: {self.score}\n")
 
     def generate_hint(self, hint_num: int) -> str:
+        """
+        
+        this function is used together with generate_hints (ln 195) to create the acceptable amount of hints (correlated to difficulty) and store them in an instance variable list called hints (ln 41). there are a total of 5 hint templates and the easiest game mode (facetiously called "hard") allows for 3 hints
+
+        Args:
+            Hint Number (int)
+        Returns:
+            Hint (str)
+        
+        """
         match hint_num:
             case 0:
                 return f"\nMASTERMIND: A hint?! Really?! You need a hint?! Fine. The last digit of the number in my head is {self.ans[-1]}"
@@ -187,13 +205,21 @@ class Game:
                         return f"\nMASTERMIND: {hint} is not a digit in the number I am thinking of"
         return ""
 
-    def generate_hints(self) -> list:
-        # num_total_hints_in_hints_bank = number of total possible hints that hints are being chosen from
-        num_hints_in_hints_bank = 5
+    def generate_hints(self) -> list[str]:
+        """
+        
+        this function is used together with generate_hint (ln 171) and python's random module to randomly create the appropriate number of hints (correlated to difficulty chosen) per game. NUM_UNIQUE_HINT_TEMPLATES is a variable that represents the total number of unique hint templates that hints can be made from (ln 21)
+
+        Args:
+            None
+        Returns:
+            [hint_a, hint_b, hint_c] (list[str])
+        """
+        num_unique_hint_templates = NUM_UNIQUE_HINT_TEMPLATES
         hints = []
-        possible_hints = set(range(num_hints_in_hints_bank))
+        possible_hints = set(range(num_unique_hint_templates))
         while len(hints) < 3 - self.difficulty:
-            random_hint_num = random.randint(0,num_hints_in_hints_bank-1)
+            random_hint_num = random.randint(0,num_unique_hint_templates-1)
             if random_hint_num in possible_hints:
                 hints.append(self.generate_hint(random_hint_num))
                 possible_hints.remove(random_hint_num)
@@ -206,20 +232,20 @@ class Game:
         this function passes in the user's input_guess and validates it across 3 parameters:
 
         1. len of input_guess should be the same as the digit count instance attribute (ln 183)
-
         2. digits in input_guess should only be from 0-7, inclusive (ln 183)
-
         3. input_guess only contains chars that can be cast as an integer (ln 195)
 
         Args:
-            input_guess: str = "1234"
+            Input Guess (str)
         Returns:
-            "1234"
+            Validated Guess (str)
             
         """    
         while True:
 
             if input_guess in KEYWORDS:
+                return input_guess
+            elif input_guess == self.ans:
                 return input_guess
             try:
                 if len(input_guess) != self.digit_count or "8" in input_guess or "9" in input_guess:
@@ -231,16 +257,16 @@ class Game:
                     input_guess = input()
                     if input_guess in KEYWORDS:
                         return input_guess
-                int(input_guess)
+                validated_guess = int(input_guess)
             except ValueError as v:
-                print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that enter {self.digit_count} digits between 0-7, inclusive.\n")
+                print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that you enter {self.digit_count} digits between 0-7, inclusive.\n")
                 print(LINE,"\n")
                 print("Hints Remaining (type /hint to see a hint):", 3 - self.hints_idx)
                 print("Guesses Remaining:",self.guesses_remaining)
                 sys.stdout.write("Guess: ")
                 input_guess = input()
             else:
-                return f"{input_guess}"
+                return f"{validated_guess}"
 
     def generate_guess_feedback(self, guess: str) -> str | dict[str, int]:
         if guess in KEYWORDS:
@@ -347,9 +373,10 @@ class Game:
                 print("Guesses Remaining (enter /guess_history to see Guess History):",self.guesses_remaining)
                 sys.stdout.write("Guess: ")
                 guess = input()
-                if guess in KEYWORDS:
-                    self.handle_keyword(guess)
-                elif guess == self.ans:
+                validated_guess = self.validate_guess(guess)
+                if validated_guess in KEYWORDS:
+                    self.handle_keyword(validated_guess)
+                elif validated_guess == self.ans:
                     if self.handle_victory_and_ask_replay() == True:
                         self.handle_replay()
                         continue
@@ -357,7 +384,6 @@ class Game:
                         print("\nMASTERMIND: I'll get you next time!!!")
                         return
                 else:
-                    validated_guess = self.validate_guess(guess)
                     guess_feedback = self.generate_guess_feedback(validated_guess)
                     print(guess_feedback)
                     self.guess_history.append(guess_feedback)
