@@ -1,2 +1,3 @@
 from game_class import Game
-g = Game(cheater=True)
+
+g = Game(show_ans=True)
