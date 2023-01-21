@@ -236,13 +236,12 @@ class Game:
 
         """
 
-        this function passes in the user's input_guess and validates it across 3 parameters, returning a validated guess:
+        this function passes in the user's input_guess and validates it using regex across 2 parameters, returning a validated guess:
 
-        1. len of input_guess should be the same as the digit count instance attribute which is set based on difficulty (ln 261)
-        2. digits in input_guess should only be from 0-7, inclusive (ln 261)
-        3. input_guess only contains chars that can be cast as an integer  - meaning strings of integers (ln 267)
+        1. len of input_guess should be the same as the digit count instance attribute which is set based on difficulty
+        2. chars in input_guess should only be digits and digits should only be from 0-7, inclusive
 
-        if input_guess fails any of the above 3 validations, user is prompted again for a new input
+        if input_guess fails any of the above 2 validations, user is prompted again for a new input
 
         Example Arg(s):
             "1234" (str)
@@ -252,25 +251,22 @@ class Game:
         """
 
         while True:
-
             if input_guess in KEYWORDS:
                 return input_guess
             elif input_guess == self.ans:
                 return input_guess
             try:
-                if len(input_guess) != self.digit_count or "8" in input_guess or "9" in input_guess:
-                    print(f"\nMASTERMIND: I tire of your ignorance! Your guess must be {self.digit_count} digits, each between 0 and 7, inclusive!\n")
+                if re.match(r"^[0-7]{%s}$"%(self.digit_count), input_guess):
+                   validated_guess = input_guess
+                else:
+                    print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that you enter {self.digit_count} digits between 0-7, inclusive.\n")
                     self.print_turn_intro()
                     input_guess = input()
-                    if input_guess in KEYWORDS:
-                        return input_guess
-                validated_guess = int(input_guess)
-            except ValueError as v:
-                print(f"\nMASTERMIND: You fool - what do you mean, \"{input_guess}\"?! I demand that you enter {self.digit_count} digits between 0-7, inclusive.\n")
-                self.print_turn_intro()
-                input_guess = input()
+                    continue
+            except BaseException as e:
+                pass   
             else:
-                return f"{validated_guess}"
+                return validated_guess
 
     def generate_guess_feedback(self, guess: str) -> str | dict[str, int]:
 
@@ -491,7 +487,7 @@ class Game:
         """
 
         print(LINE,"\n")
-        print(f"Keywords: {KEYWORDS}")
+        print(f"Keywords (try entering one of these during the guess phase): {KEYWORDS}")
         print("Hints Remaining (enter /hint to see a hint or /hint_history to see previous hints):", 3 - self.hints_idx - self.difficulty)
         print("Guesses Remaining (enter /guess_history to see Guess History):",self.guesses_remaining)
         sys.stdout.write("Guess: ")
