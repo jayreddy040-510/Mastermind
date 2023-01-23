@@ -11,17 +11,19 @@ Ultimately, I wanted to make a game that emulates the simple, addictive feel of 
 
 Requires: python 3.10.x, git, bash/zsh
 
-1. clone the repository from the remote
+1. find where in your local filetree you want to clone the repository from the remote and run the following command:
 
-2. cd into root ```(../mastermind_lite/)```
+2.     git clone https://github.com/jayreddy040-510/Mastermind.git
 
-3.      source virtual_env/bin/activate
+3. cd into root of project ```(../mastermind_lite/)```
 
-4. check if shell is running inside virutal_env by seeing if (virtual_env) is at the beginning of your shell prompt. shell needs to run inside virtual_env to guarantee that all of the correct dependencies and their respective versions are being used. check python3 version is 3.10.x by running "python3 --version"
+4.      source virtual_env/bin/activate
 
-4.      python3 run.py
+5. check if shell is running inside virutal_env by seeing if (virtual_env) is at the beginning of your shell prompt. shell needs to run inside virtual_env to guarantee that all of the correct dependencies and their respective versions are being used. check python3 version is 3.10.x by running "python3 --version"
 
-5. if SIGINT (ctrl + C) signal isn't working to close program, use SIGQUIT signal (ctrl + \\)
+6.      python3 run.py
+
+7. if SIGINT (ctrl + C) signal isn't working to close program, use SIGQUIT signal (ctrl + \\)
 
 # Features Implemented
 
