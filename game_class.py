@@ -23,7 +23,7 @@ NUM_UNIQUE_HINT_TEMPLATES=5
 #keywords that user can input
 KEYWORDS=["/guess_history", "/hint", "/hint_history", "/score"]
 
-#various tools used for UX/UI
+#various tools used for UI/UX
 from uiux import TITLE, WIN_MSG, LOSE_MSG, LINE
 
 
@@ -289,6 +289,7 @@ class Game:
             
         """
         valid_guess = False
+
         while valid_guess == False:
             if input_guess in KEYWORDS:
                 return input_guess
@@ -322,9 +323,6 @@ class Game:
 
         """
 
-        if validated_guess in KEYWORDS:
-            return validated_guess
-        # guess = self.validate_guess(guess)
         ans = self.ans
         ret = {"correct number": 0, "correct location": 0}
         ans_count: dict = defaultdict(int)
@@ -557,7 +555,9 @@ class Game:
 
         """
         
-        this function is called when the user loses (exhausts their remaining guesses in the run_game() while loop which runs the overall game logic). it then calls the ask_user_replay() function to ask whether the user wants to replay. if the user does want to replay it returns True to run_game() (ln 549-554), otherwise it returns False.
+        this function is called when the user loses (exhausts their remaining guesses in the run_game() while loop which runs
+        the overall game logic). it then calls the ask_user_replay() function to ask whether the user wants to replay. 
+        if the user does want to replay it returns True to run_game() (ln 549-554), otherwise it returns False.
 
         Example Arg(s):
             None
@@ -593,6 +593,7 @@ class Game:
                 validated_guess = self.validate_guess(guess)
                 if validated_guess in KEYWORDS:
                     self.handle_keyword(validated_guess)
+                    continue
                 elif validated_guess == self.ans:
                     if self.handle_win_and_ask_replay() == True:
                         self.handle_replay()
