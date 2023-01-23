@@ -55,4 +55,4 @@ Requires: python 3.10.x, git, bash/zsh
 
 * If you want to print the answer to the terminal at the beginning of the game to easily access some of the conditional logic in the winning conditional tree, simply pass show_ans=True into the instantiation of the Game class in run.py.
 
-* The primary game logic is inside of game_class.py. Depending on which linter/IDE you're using, you may see some error highlights. These are mostly due to optional typing not aligning across some site packages and can be ignored.
+* The primary game logic is inside of game_class.py. Depending on which linter/IDE you're using, you may see some error highlights. These are mostly due to optional typing not aligning across some site packages and can be ignored. Additionally, some linters will not read python 3.10.x's match/case syntax and will highlight it as an error. 

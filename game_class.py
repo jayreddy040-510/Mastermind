@@ -204,7 +204,7 @@ class Game:
 
         """
         
-        this function is used together with generate_hints() (ln 211) to create the acceptable quantity of hints
+        this function is used together with generate_hints() (ln 244) to create the acceptable quantity of hints
         (correlated to difficulty) and store them in an instance variable list called hints (ln 37). there are a
         total of 5 unique hint templates and the easiest game mode (facetiously called "hard") allows for 3 hints
 
@@ -245,9 +245,9 @@ class Game:
 
         """
         
-        this function is used together with generate_hint() (ln 172) and python's random module to randomly generate
+        this function is used together with generate_hint() (ln 203) and python's random module to randomly generate
         a number which is then plugged into generate_hint which returns a hint and appends it to the hints list instance
-        attribute (ln 230). NUM_UNIQUE_HINT_TEMPLATES is a variable that represents the total number of unique hint
+        attribute (ln 266). NUM_UNIQUE_HINT_TEMPLATES is a variable that represents the total number of unique hint
         templates that hints can be made from (ln 21)
 
         Example Arg(s):
@@ -346,7 +346,7 @@ class Game:
         """
         
         this function handles the /guess_history keyword, printing every string in the guess_history
-        list instance variable, which is a list of guess_feedback strings (one per valid user guess (ln 546))
+        list instance variable, which is a list of guess_feedback strings (one per valid user guess (ln 607))
 
         Example Arg(s):
             None
@@ -426,7 +426,7 @@ class Game:
 
         """
         
-        this function accepts a keyword and is always called after a conditional check if a string is a keyword (ln 534-535).
+        this function accepts a keyword and is always called after a conditional check if a string is a keyword (ln 594-595).
         it then uses a dictionary to map the appropriate keyword handling function to the keyword called by the user
 
         Example Arg(s):
@@ -456,7 +456,7 @@ class Game:
         
         this function is called when user correctly guesses MASTERMIND's number, which is saved as self.ans.
         the function then increments the score in the naive database score.txt file by calling increment_score_in_file().
-        it then calls ask_user_replay() to initiate a while loop that asks for a valid user response to replay question (ln 444-452). 
+        it then calls ask_user_replay() to initiate a while loop that asks for a valid user response to replay question (ln 491-502). 
         handle_win_and_ask_replay() will then return True or False depending on whether user does or doesn't want to replay the game
 
         Example Arg(s):
@@ -478,7 +478,7 @@ class Game:
         """
         
         this function asks the user whether they want to replay the game after winning/losing. user input is validated against
-        4 valid respones: "y", "yes", "n", or "no" (ln 447). if user doesn't want to replay, returns False; otherwise, returns True
+        4 valid respones: "y", "yes", "n", or "no" (ln 494). if user doesn't want to replay, returns False; otherwise, returns True
 
         Example Arg(s):
             None
@@ -505,8 +505,8 @@ class Game:
 
         """
         
-        this function handles the case when ask_user_replay() and subsequently one of its two parent functions: handle_win_ask_replay()
-        or handle_lose_ask_replay() return True (ln 538, ln 550), meaning the user does want to replay the game. it plays the welcome animation 
+        this function handles the case when ask_user_replay() AND one of its two parent functions: handle_win_ask_replay()
+        or handle_lose_ask_replay() return True (ln 598, ln 610), meaning the user does want to replay the game. it plays the welcome animation 
         slightly altered to reflect that user is replaying the game), resets all of the relevant instance variables to game starting values,
         asks for the user difficulty again, fetches a new RNG API answer based on the parameters that correlate to the user input difficulty level, 
         and generates new hints
@@ -557,7 +557,7 @@ class Game:
         
         this function is called when the user loses (exhausts their remaining guesses in the run_game() while loop which runs
         the overall game logic). it then calls the ask_user_replay() function to ask whether the user wants to replay. 
-        if the user does want to replay it returns True to run_game() (ln 549-554), otherwise it returns False.
+        if the user does want to replay it returns True to run_game(), otherwise it returns False.
 
         Example Arg(s):
             None
