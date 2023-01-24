@@ -19,11 +19,13 @@ Requires: python 3.10.x, git, bash/zsh
 
 4.      source virtual_env/bin/activate
 
-5. check if shell is running inside virutal_env by seeing if (virtual_env) is at the beginning of your shell prompt. shell needs to run inside virtual_env to guarantee that all of the correct dependencies and their respective versions are being used. check python3 version is 3.10.x by running "python3 --version"
+5.	python3 -m pip install -r requirements.txt
 
-6.      python3 run.py
+6. check if shell is running inside virutal_env by seeing if (virtual_env) is at the beginning of your shell prompt. shell needs to run inside virtual_env to guarantee that all of the correct dependencies and their respective versions are being used. check python3 version is 3.10.x by running "python3 --version"
 
-7. if SIGINT (ctrl + C) signal isn't working to close program, use SIGQUIT signal (ctrl + \\)
+7.      python3 run.py
+
+8. if SIGINT (ctrl + C) signal isn't working to close program, use SIGQUIT signal (ctrl + \\)
 
 # Features Implemented
 
