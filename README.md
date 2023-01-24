@@ -15,7 +15,7 @@ Requires: python 3.10.x, git, bash/zsh
 
 2.     git clone https://github.com/jayreddy040-510/Mastermind.git
 
-3. cd into root of project ```(../mastermind_lite/)```
+3. cd into root of project ```(../Mastermind/)```
 
 4.      source virtual_env/bin/activate
 
