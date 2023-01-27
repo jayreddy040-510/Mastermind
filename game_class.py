@@ -7,6 +7,7 @@ import random
 import re
 from dotenv import load_dotenv
 from collections import defaultdict
+from hint_class import Hint
 
 #loads env
 load_dotenv()
@@ -200,46 +201,6 @@ class Game:
         finally:
             sys.stdout.write(f"\n\rScore: {self.score}\n")
 
-    def generate_hint(self, hint_num: int) -> str:
-
-        """
-        
-        this function is used together with generate_hints() (ln 244) to create the acceptable quantity of hints
-        (correlated to difficulty) and store them in an instance variable list called hints (ln 37). there are a
-        total of 5 unique hint templates and the easiest game mode (facetiously called "hard") allows for 3 hints
-
-        Example Arg(s):
-            1 (int)
-        Example Return:
-            MASTERMIND: FINE. The sum of the digits for the number in my head is 24" (string)
-        
-        """
-
-        match hint_num:
-            case 0:
-                return f"\nMASTERMIND: A hint?! Really?! You need a hint?! Fine. The last digit of the number in my head is {self.ans[-1]}"
-            case 1:
-                sum = 0
-                for idx in range(len(self.ans)):
-                    sum += int(self.ans[idx])
-                return f"\nMASTERMIND: FINE. The sum of the digits for the number in my head is {sum}"
-            case 2:
-                less_than_equal_3_count = 0
-                for idx in range(len(self.ans)):
-                    if int(self.ans[idx]) <= 3:
-                        less_than_equal_3_count += 1
-                return f"\nMASTERMIND: There are {less_than_equal_3_count} digits in the number in my head that are less than or equal to 3"
-            case 3:
-                product = 1
-                for idx in range(len(self.ans)):
-                    product *= int(self.ans[idx])
-                return f"\nMASTERMIND: FINE. The product of the digits for the number in my head is {product}"
-            case 4:
-                 while True:
-                    hint = str(random.randint(0,7))
-                    if hint not in self.ans:
-                        return f"\nMASTERMIND: {hint} is not a digit in the number I am thinking of"
-        return ""
 
     def generate_hints(self) -> list[str]:
 
@@ -263,7 +224,7 @@ class Game:
         while len(hints) < 3 - self.difficulty:
             random_hint_num = random.randint(0,num_unique_hint_templates-1)
             if random_hint_num in possible_hints:
-                hints.append(self.generate_hint(random_hint_num))
+                hints.append(Hint(ans=self.ans, hint_num=random_hint_num).description)
                 possible_hints.remove(random_hint_num)
         return hints
         
