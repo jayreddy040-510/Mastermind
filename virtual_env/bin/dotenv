@@ -1,4 +1,4 @@
-#!/Users/jayreddy/sandbox/mastermind_lite/virtual_env/bin/python3
+#!/Users/jayreddy/sandbox/Mastermind/virtual_env/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

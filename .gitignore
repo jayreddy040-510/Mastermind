@@ -1,1 +1,5 @@
 # normally would put .env file in here
+
+/virtual_env
+.env
+guess_who.py

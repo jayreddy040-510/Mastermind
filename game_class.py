@@ -333,7 +333,7 @@ class Game:
                 ret["correct location"] += 1
             ans_count[ans[x]] += 1
             guess_count[validated_guess[x]] += 1
-        
+
         for key in ans_count:
             if guess_count[key] > 0:
                 ret["correct number"] += min(ans_count[key], guess_count[key])

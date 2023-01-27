@@ -17,15 +17,17 @@ Requires: python 3.10.x, git, bash/zsh
 
 3. cd into root of project ```(../Mastermind/)```
 
-4.      source virtual_env/bin/activate
+4.      python3 -m venv mm_venv
 
-5.	python3 -m pip install -r requirements.txt
+5.      source mm_venv/bin/activate
 
-6. check if shell is running inside virutal_env by seeing if (virtual_env) is at the beginning of your shell prompt. shell needs to run inside virtual_env to guarantee that all of the correct dependencies and their respective versions are being used. check python3 version is 3.10.x by running "python3 --version"
+6.	python3 -m pip install -r requirements.txt
 
-7.      python3 run.py
+7. check if shell is running inside the mm_venv you created by seeing if (mm_venv) is at the beginning of your shell prompt. shell needs to run inside mm_venv to guarantee that all of the correct dependencies and their respective versions are being used. check python3 version is 3.10.x by running "python3 --version"
 
-8. if SIGINT (ctrl + C) signal isn't working to close program, use SIGQUIT signal (ctrl + \\)
+8.      python3 run.py
+
+9. if SIGINT (ctrl + C) signal isn't working to close program, use SIGQUIT signal (ctrl + \\)
 
 # Features Implemented
 
@@ -55,7 +57,7 @@ Requires: python 3.10.x, git, bash/zsh
 
 # Miscellaneous
 
-* If you are new to python you will know you are inside the virtual_env if you see (virtual_env) in front of your user@path at the bottom of your terminal.
+* If you are new to python you will know you are inside the mm_venv virtual environment if you see (mm_env) in front of your user@path at the bottom of your terminal.
 
 * If you want to print the answer to the terminal at the beginning of the game to easily access some of the conditional logic in the winning conditional tree, simply pass show_ans=True into the instantiation of the Game class in run.py.
 

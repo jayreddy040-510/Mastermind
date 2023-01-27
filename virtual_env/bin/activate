@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/jayreddy/sandbox/mastermind_lite/virtual_env"
+VIRTUAL_ENV="/Users/jayreddy/sandbox/Mastermind/virtual_env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
