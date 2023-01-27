@@ -1,3 +1,4 @@
+import random
 
 class Hint:
     def __init__(self, ans: str, hint_num: int=0):

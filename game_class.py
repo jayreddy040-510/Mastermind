@@ -285,19 +285,23 @@ class Game:
         """
 
         ans = self.ans
+        ans_counter: list = [0,0,0,0,0,0,0,0,0,0]
+        guess_counter: list = [0,0,0,0,0,0,0,0,0,0]
         ret = {"correct number": 0, "correct location": 0}
-        ans_count: dict = defaultdict(int)
-        guess_count: dict = defaultdict(int)
 
-        for x in range(self.digit_count):
-            if ans[x] == validated_guess[x]:
+        for x in range(4):
+            ans_digit = int(ans[x])
+            validated_guess_digit = int(validated_guess[x])
+
+            if ans_digit == validated_guess_digit:
                 ret["correct location"] += 1
-            ans_count[ans[x]] += 1
-            guess_count[validated_guess[x]] += 1
 
-        for key in ans_count:
-            if guess_count[key] > 0:
-                ret["correct number"] += min(ans_count[key], guess_count[key])
+            ans_counter[ans_digit] += 1
+            guess_counter[validated_guess_digit] += 1
+
+        for idx in range(10):
+            ret["correct number"] += min(ans_counter[idx], guess_counter[idx])
+        # ret["correct number"] -= ret["correct location"]
         
         ret = "all incorrect" if ret["correct location"] + ret["correct number"] == 0 else ret
         return f"Feedback for {validated_guess}: {ret}\n"
@@ -576,3 +580,4 @@ class Game:
                             return
             except Exception as e:
                 print("MASTERMIND: Try again...\n")
+                print(e)

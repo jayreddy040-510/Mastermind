@@ -1,3 +1,3 @@
 from game_class import Game
 
-g = Game(show_ans=False)
+g = Game(show_ans=True)
