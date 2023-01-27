@@ -31,7 +31,28 @@ from uiux import TITLE, WIN_MSG, LOSE_MSG, LINE
 #main game class
 class Game:
     def __init__(self, show_ans: bool=False):
-        self.print_welcome_animation()
+        self.show_ans: bool = show_ans
+        self.refresh_game_attributes(replay=False)
+        self.run_game()
+
+    def refresh_game_attributes(self, replay=False) -> None:
+
+        """
+        
+        this function refreshes all of the game attributes needed to play a new game. handles the case when a new game is started OR ask_user_replay()
+        AND one of its two parent functions: handle_win_ask_replay() or handle_lose_ask_replay() return True (ln 598, ln 610), meaning the user does
+        want to replay the game. it plays the welcome animation slightly altered to reflect that user is replaying the game), resets all of the relevant
+        instance variables to game starting values, asks for the user difficulty again, fetches a new RNG API answer based on the parameters
+        that correlate to the user input difficulty level, and generates new hints
+
+        Example Arg(s):
+            None
+        Example Return:
+            None
+        
+        """
+
+        self.print_welcome_animation(replay=replay)
         self.score: int = self.read_score_from_file()
         self.difficulty: int = self.input_user_difficulty()
         self.ans: str = self.fetch_answer()
@@ -40,10 +61,9 @@ class Game:
         self.digit_count: int = 4 + self.difficulty
         self.guesses_remaining: int = 10
         self.guess_history: list = []
-        self.show_ans: bool = show_ans
-        print("\rSYS_MESSAGE: show_ans = True. Answer = ",self.ans,"\n") if show_ans == True else True
+        print("\rSYS_MESSAGE: show_ans = True. Answer = ",self.ans,"\n") if self.show_ans == True else True
         print(f"MASTERMIND: I'm thinking of a {self.digit_count} digit number using digits between 0 and 7. Try and guess it, if you dare!\n")
-        self.run_game()
+        return
 
     def print_welcome_animation(self, replay: bool=False) -> None:
 
@@ -466,36 +486,6 @@ class Game:
         else:
             return False
 
-    def handle_replay(self) -> None:
-
-        """
-        
-        this function handles the case when ask_user_replay() AND one of its two parent functions: handle_win_ask_replay()
-        or handle_lose_ask_replay() return True (ln 598, ln 610), meaning the user does want to replay the game. it plays the welcome animation 
-        slightly altered to reflect that user is replaying the game), resets all of the relevant instance variables to game starting values,
-        asks for the user difficulty again, fetches a new RNG API answer based on the parameters that correlate to the user input difficulty level, 
-        and generates new hints
-
-        Example Arg(s):
-            None
-        Example Return:
-            None
-        
-        """
-
-        self.print_welcome_animation(replay=True)
-        self.score = self.read_score_from_file()
-        self.difficulty = self.input_user_difficulty()
-        self.ans = self.fetch_answer()
-        print("\rSYS_MESSAGE: show_ans = True. Answer = ",self.ans,"\n") if self.show_ans == True else True
-        print(f"MASTERMIND: I'm thinking of a {self.digit_count} digit number using digits between 0 and 7. Try and guess it, if you dare!\n")
-        self.hints = self.generate_hints()
-        self.hints_idx = 0
-        self.digit_count = 4 + self.difficulty
-        self.guesses_remaining = 10
-        self.guess_history = []
-        return
-
     def print_turn_intro(self) -> None:
 
         """
@@ -561,7 +551,7 @@ class Game:
                     continue
                 elif validated_guess == self.ans:
                     if self.handle_win_and_ask_replay() == True:
-                        self.handle_replay()
+                        self.refresh_game_attributes(replay=True)
                         continue
                     else:
                         print("\nMASTERMIND: I'll get you next time!!!")
@@ -573,7 +563,7 @@ class Game:
                     self.guesses_remaining -= 1
                     if self.guesses_remaining == 0:
                         if self.handle_lose_and_ask_replay() == True:
-                            self.handle_replay()
+                            self.refresh_game_attributes(replay=True)
                             continue
                         else:
                             print("\nMASTERMIND: Pfft! What a sore loser! Until next time.")
